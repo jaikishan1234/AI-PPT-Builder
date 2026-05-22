@@ -18,6 +18,7 @@ import {
 } from '#/features/presentations/constants/presentation-options'
 import { Button } from '#/components/ui/button'
 import { Sparkles, Wand2 } from 'lucide-react'
+import { PRESENTATION_TEMPLATES } from '#/features/presentations/constants/presentation-templates'
 
 type HomeFormState = {
   content: string
@@ -195,6 +196,32 @@ function Home() {
               <Wand2 className="size-5" />
               Generate PPT
             </Button>
+          </div>
+        </div>
+
+         <div className="mt-8">
+          <p className="text-center text-sm text-muted-foreground mb-3">
+            Try a template
+          </p>
+          <div className="flex flex-wrap justify-center gap-2">
+            {PRESENTATION_TEMPLATES.map((template) => (
+              <button
+                key={template.id}
+                type="button"
+                onClick={() => {
+                  setForm({
+                    content: template.content,
+                    slideCount: template.slides,
+                    style: template.style,
+                    tone: template.tone,
+                    layout: template.layout,
+                  })
+                }}
+                className="px-4 py-2 text-sm rounded-full border border-border/50 bg-card/50 text-muted-foreground hover:text-foreground hover:border-primary/50 hover:bg-primary/5 transition-all"
+              >
+                {template.label}
+              </button>
+            ))}
           </div>
         </div>
       </div>
