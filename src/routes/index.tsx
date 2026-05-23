@@ -19,6 +19,11 @@ import {
 import { Button } from '#/components/ui/button'
 import { Sparkles, Wand2 } from 'lucide-react'
 import { PRESENTATION_TEMPLATES } from '#/features/presentations/constants/presentation-templates'
+import { useMutation, useQueryClient } from '@tanstack/react-query'
+import { createPresentation } from '#/features/presentations/actions/presentation-mutations'
+import { toast } from 'sonner'
+import { useNavigate } from '@tanstack/react-router'
+import { presentationQueryKeys } from '#/features/presentations/hooks/query-keys'
 
 type HomeFormState = {
   content: string
@@ -45,6 +50,8 @@ export const Route = createFileRoute('/')({
 })
 
 function Home() {
+  const navigate = useNavigate()
+  const queryClient = useQueryClient()
   const [form, setForm] = useState<HomeFormState>({
     content: '',
     slideCount: 8,
@@ -52,6 +59,38 @@ function Home() {
     tone: 'formal',
     layout: 'balanced',
   })
+
+    const createMut = useMutation({
+    mutationFn: () =>
+      createPresentation({
+        data: {
+          prompt: form.content.trim(),
+          slideCount: form.slideCount,
+          style: form.style,
+          tone: form.tone,
+          layout: form.layout,
+        },
+      }),
+    onSuccess: (presentation) => {
+      toast.success('Presentation created')
+      queryClient.invalidateQueries({ queryKey: presentationQueryKeys.list() })
+      navigate({
+        to: '/presentations/$presentationId',
+        params: { presentationId: presentation.id },
+      })
+    },
+    onError: (e) => {
+      toast.error(e instanceof Error ? e.message : 'Could not create presentation')
+    },
+  })
+
+  const handleGenerate = () => {
+    if (!form.content.trim()) {
+      toast.error('Please enter your content first')
+      return
+    }
+    createMut.mutate()
+  }
 
   return (
     <main className="min-h-screen pt-24 pb-12 px-4">
@@ -190,11 +229,21 @@ function Home() {
           <div className="flex justify-end pt-2">
             <Button
               size="lg"
-              onClick={() => {}}
+              onClick={handleGenerate}
+              disabled={createMut.isPending || !form.content.trim()}
               className="rounded-xl px-8 gap-2 font-semibold"
             >
-              <Wand2 className="size-5" />
-              Generate PPT
+              {createMut.isPending ? (
+                <>
+                  <Sparkles className="size-5 animate-pulse" />
+                  Creating…
+                </>
+              ) : (
+                <>
+                  <Wand2 className="size-5" />
+                  Generate PPT
+                </>
+              )}
             </Button>
           </div>
         </div>

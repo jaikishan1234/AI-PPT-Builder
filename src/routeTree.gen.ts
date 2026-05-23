@@ -13,6 +13,7 @@ import { Route as ContactRouteImport } from './routes/contact'
 import { Route as AboutRouteImport } from './routes/about'
 import { Route as AuthRouteRouteImport } from './routes/_auth/route'
 import { Route as IndexRouteImport } from './routes/index'
+import { Route as PresentationsPresentationIdRouteImport } from './routes/presentations.$presentationId'
 import { Route as ApiInngestRouteImport } from './routes/api/inngest'
 import { Route as AuthLoginRouteImport } from './routes/_auth/login'
 import { Route as ApiAuthSplatRouteImport } from './routes/api/auth/$'
@@ -36,6 +37,12 @@ const IndexRoute = IndexRouteImport.update({
   path: '/',
   getParentRoute: () => rootRouteImport,
 } as any)
+const PresentationsPresentationIdRoute =
+  PresentationsPresentationIdRouteImport.update({
+    id: '/presentations/$presentationId',
+    path: '/presentations/$presentationId',
+    getParentRoute: () => rootRouteImport,
+  } as any)
 const ApiInngestRoute = ApiInngestRouteImport.update({
   id: '/api/inngest',
   path: '/api/inngest',
@@ -58,6 +65,7 @@ export interface FileRoutesByFullPath {
   '/contact': typeof ContactRoute
   '/login': typeof AuthLoginRoute
   '/api/inngest': typeof ApiInngestRoute
+  '/presentations/$presentationId': typeof PresentationsPresentationIdRoute
   '/api/auth/$': typeof ApiAuthSplatRoute
 }
 export interface FileRoutesByTo {
@@ -66,6 +74,7 @@ export interface FileRoutesByTo {
   '/contact': typeof ContactRoute
   '/login': typeof AuthLoginRoute
   '/api/inngest': typeof ApiInngestRoute
+  '/presentations/$presentationId': typeof PresentationsPresentationIdRoute
   '/api/auth/$': typeof ApiAuthSplatRoute
 }
 export interface FileRoutesById {
@@ -76,6 +85,7 @@ export interface FileRoutesById {
   '/contact': typeof ContactRoute
   '/_auth/login': typeof AuthLoginRoute
   '/api/inngest': typeof ApiInngestRoute
+  '/presentations/$presentationId': typeof PresentationsPresentationIdRoute
   '/api/auth/$': typeof ApiAuthSplatRoute
 }
 export interface FileRouteTypes {
@@ -86,9 +96,17 @@ export interface FileRouteTypes {
     | '/contact'
     | '/login'
     | '/api/inngest'
+    | '/presentations/$presentationId'
     | '/api/auth/$'
   fileRoutesByTo: FileRoutesByTo
-  to: '/' | '/about' | '/contact' | '/login' | '/api/inngest' | '/api/auth/$'
+  to:
+    | '/'
+    | '/about'
+    | '/contact'
+    | '/login'
+    | '/api/inngest'
+    | '/presentations/$presentationId'
+    | '/api/auth/$'
   id:
     | '__root__'
     | '/'
@@ -97,6 +115,7 @@ export interface FileRouteTypes {
     | '/contact'
     | '/_auth/login'
     | '/api/inngest'
+    | '/presentations/$presentationId'
     | '/api/auth/$'
   fileRoutesById: FileRoutesById
 }
@@ -106,6 +125,7 @@ export interface RootRouteChildren {
   AboutRoute: typeof AboutRoute
   ContactRoute: typeof ContactRoute
   ApiInngestRoute: typeof ApiInngestRoute
+  PresentationsPresentationIdRoute: typeof PresentationsPresentationIdRoute
   ApiAuthSplatRoute: typeof ApiAuthSplatRoute
 }
 
@@ -137,6 +157,13 @@ declare module '@tanstack/react-router' {
       path: '/'
       fullPath: '/'
       preLoaderRoute: typeof IndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/presentations/$presentationId': {
+      id: '/presentations/$presentationId'
+      path: '/presentations/$presentationId'
+      fullPath: '/presentations/$presentationId'
+      preLoaderRoute: typeof PresentationsPresentationIdRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/api/inngest': {
@@ -181,6 +208,7 @@ const rootRouteChildren: RootRouteChildren = {
   AboutRoute: AboutRoute,
   ContactRoute: ContactRoute,
   ApiInngestRoute: ApiInngestRoute,
+  PresentationsPresentationIdRoute: PresentationsPresentationIdRoute,
   ApiAuthSplatRoute: ApiAuthSplatRoute,
 }
 export const routeTree = rootRouteImport
