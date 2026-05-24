@@ -1,4 +1,4 @@
-import { createFileRoute, redirect } from '@tanstack/react-router'
+import { createFileRoute, redirect, useNavigate } from '@tanstack/react-router'
 import { getSession } from '@/lib/auth.functions'
 import { Textarea } from '#/components/ui/textarea'
 import { useState } from 'react'
@@ -19,11 +19,12 @@ import {
 import { Button } from '#/components/ui/button'
 import { Sparkles, Wand2 } from 'lucide-react'
 import { PRESENTATION_TEMPLATES } from '#/features/presentations/constants/presentation-templates'
-import { useMutation, useQueryClient } from '@tanstack/react-query'
+import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { createPresentation } from '#/features/presentations/actions/presentation-mutations'
 import { toast } from 'sonner'
-import { useNavigate } from '@tanstack/react-router'
 import { presentationQueryKeys } from '#/features/presentations/hooks/query-keys'
+import { listPresentation } from '#/features/presentations/actions/presentation-queries'
+import { PresentationListSection } from '#/features/presentations/components/presentation-list-section'
 
 type HomeFormState = {
   content: string
@@ -58,6 +59,11 @@ function Home() {
     style: 'minimal',
     tone: 'formal',
     layout: 'balanced',
+  })
+
+  const { data: presentations = [], isPending: listPending } = useQuery({
+    queryKey: presentationQueryKeys.list(),
+    queryFn: () => listPresentation(),
   })
 
     const createMut = useMutation({
@@ -95,6 +101,12 @@ function Home() {
   return (
     <main className="min-h-screen pt-24 pb-12 px-4">
       <div className="max-w-4xl mx-auto">
+
+        <PresentationListSection
+          presentations={presentations}
+          isPending={listPending}
+        />
+
         {/* Header */}
         <div className="text-center mb-10">
           <h1 className="text-4xl md:text-5xl font-bold mb-3">

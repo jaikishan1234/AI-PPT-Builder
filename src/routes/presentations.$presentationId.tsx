@@ -38,9 +38,15 @@ import {
 import { useState } from 'react'
 import { Textarea } from '#/components/ui/textarea'
 import { Slider } from '#/components/ui/slider'
-import { LAYOUT_OPTIONS, SLIDE_STYLES, TONE_OPTIONS } from '#/features/presentations/constants/presentation-options'
+import {
+  LAYOUT_OPTIONS,
+  SLIDE_STYLES,
+  TONE_OPTIONS,
+} from '#/features/presentations/constants/presentation-options'
 import { SlidePreview } from '#/features/presentations/components/slide-preview'
-
+import { SlideCard } from '#/features/presentations/components/slide-card'
+import { SlideshowModal } from '#/features/presentations/components/slideshow-modal'
+import { useFullscreen } from '#/features/presentations/hooks/use-fullscreen'
 
 export const Route = createFileRoute('/presentations/$presentationId')({
   component: RouteComponent,
@@ -67,6 +73,10 @@ function RouteComponent() {
   } = usePresentationDetail(presentationId, {
     onDeleted: () => navigate({ to: '/' }),
   })
+
+  const { isFullscreen, toggleFullscreen } = useFullscreen(
+    'slide-preview-container',
+  )
 
   if (query.isPending) {
     return (
@@ -96,8 +106,7 @@ function RouteComponent() {
 
   const data = query.data
   const thumb = presentationThumbnailUrl(data.id)
-   const activeSlide = slides.at(activeSlideIndex)
-
+  const activeSlide = slides.at(activeSlideIndex)
 
   return (
     <main className="min-h-screen pt-24 pb-12 px-4">
@@ -130,7 +139,7 @@ function RouteComponent() {
                 className="rounded-xl border border-border/50 bg-background/30"
               />
               <div className="flex-1 min-w-0">
-                <h1 className="font-semibold truncate">{data.title}</h1>
+                <h1 className="font-semibold truncate">{data?.title}</h1>
                 <p className="text-sm text-muted-foreground">
                   {slides.length} slides
                 </p>
@@ -186,7 +195,7 @@ function RouteComponent() {
               </div>
             </div>
 
-                        {showSettings && (
+            {showSettings && (
               <div className="glass rounded-2xl p-6 space-y-4">
                 <div className="space-y-2">
                   <Label htmlFor="pres-title" className="text-sm font-medium">
@@ -245,7 +254,8 @@ function RouteComponent() {
                       onValueChange={(value) =>
                         setForm((s) => ({
                           ...s,
-                          style: value as (typeof SLIDE_STYLES)[number]['value'],
+                          style:
+                            value as (typeof SLIDE_STYLES)[number]['value'],
                         }))
                       }
                     >
@@ -291,7 +301,8 @@ function RouteComponent() {
                       onValueChange={(value) =>
                         setForm((s) => ({
                           ...s,
-                          layout: value as (typeof LAYOUT_OPTIONS)[number]['value'],
+                          layout:
+                            value as (typeof LAYOUT_OPTIONS)[number]['value'],
                         }))
                       }
                     >
@@ -325,7 +336,9 @@ function RouteComponent() {
                     </AlertDialogTrigger>
                     <AlertDialogContent className="glass">
                       <AlertDialogHeader>
-                        <AlertDialogTitle>Delete presentation?</AlertDialogTitle>
+                        <AlertDialogTitle>
+                          Delete presentation?
+                        </AlertDialogTitle>
                         <AlertDialogDescription>
                           This action cannot be undone. This will permanently
                           delete your presentation and all its slides.
@@ -365,7 +378,10 @@ function RouteComponent() {
             {activeSlide && (
               <div className="space-y-3">
                 <div id="slide-preview-container" className="relative group">
-                  <SlidePreview slide={activeSlide} isFullscreen={isFullscreen} />
+                  <SlidePreview
+                    slide={activeSlide}
+                    isFullscreen={isFullscreen}
+                  />
                   <Button
                     variant="secondary"
                     size="icon"
@@ -440,10 +456,34 @@ function RouteComponent() {
               </div>
             )}
           </div>
+
+          {slides.length > 0 && (
+            <aside className="lg:w-80 xl:w-96 flex flex-col">
+              <h2 className="font-medium text-sm px-2 pb-3 text-muted-foreground">
+                Slides
+              </h2>
+              <div className="flex-1 overflow-y-auto scrollbar-thin scrollbar-thumb-border scrollbar-track-transparent pr-2 -mr-2 space-y-4 max-h-[calc(100vh-14rem)]">
+                {slides.map((slide, i) => (
+                  <SlideCard
+                    key={slide.id}
+                    slide={slide}
+                    isActive={i === activeSlideIndex}
+                    onClick={() => setActiveSlideIndex(i)}
+                  />
+                ))}
+              </div>
+            </aside>
+          )}
         </div>
-
-
       </div>
+
+      {showSlideshow && (
+        <SlideshowModal
+          slides={slides}
+          initialIndex={activeSlideIndex}
+          onClose={() => setShowSlideshow(false)}
+        />
+      )}
     </main>
   )
 }
