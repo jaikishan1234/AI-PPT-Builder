@@ -35,7 +35,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from '#/components/ui/select'
-import { useState } from 'react'
+import { useCallback, useState } from 'react'
 import { Textarea } from '#/components/ui/textarea'
 import { Slider } from '#/components/ui/slider'
 import {
@@ -47,6 +47,8 @@ import { SlidePreview } from '#/features/presentations/components/slide-preview'
 import { SlideCard } from '#/features/presentations/components/slide-card'
 import { SlideshowModal } from '#/features/presentations/components/slideshow-modal'
 import { useFullscreen } from '#/features/presentations/hooks/use-fullscreen'
+import { exportToPptx } from '#/features/presentations/lib/export-pptx'
+import { toast } from 'sonner'
 
 export const Route = createFileRoute('/presentations/$presentationId')({
   component: RouteComponent,
@@ -77,6 +79,26 @@ function RouteComponent() {
   const { isFullscreen, toggleFullscreen } = useFullscreen(
     'slide-preview-container',
   )
+
+  const handleExportPptx = useCallback(async () => {
+    const data = query.data
+    if (!data) return
+    const slidesToExport = slides
+    if (slidesToExport.length === 0) return
+
+    setIsExporting(true)
+    try {
+      const filename = await exportToPptx({
+        title: data.title,
+        slides: slidesToExport,
+      })
+      toast.success(`Exported as ${filename}`)
+    } catch (e) {
+      toast.error(e instanceof Error ? e.message : 'Export failed')
+    } finally {
+      setIsExporting(false)
+    }
+  }, [query.data, slides])
 
   if (query.isPending) {
     return (
@@ -160,7 +182,7 @@ function RouteComponent() {
                       variant="outline"
                       size="sm"
                       className="rounded-xl gap-1"
-                      onClick={() => {}}
+                      onClick={handleExportPptx}
                       disabled={isExporting}
                     >
                       <Download className="size-4" />
